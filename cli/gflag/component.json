@@ -1,0 +1,16 @@
+{
+  "name": "ext.cli.gflag",
+  "type": "c++",
+
+  "deps": [
+    "core.model.cli-parser"
+  ],
+
+  "libs": ["gflags"],
+
+  "targets": {
+    "debug":   { "type": "lib" },
+    "release": { "type": "lib" },
+    "test":    { "type": "lib" }
+  }
+}
