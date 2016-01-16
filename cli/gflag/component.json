@@ -3,9 +3,11 @@
   "type": "c++",
 
   "deps": [
-    "core.model.cli-parser"
+    "core.interface.lifecycle",
+    "core.registry.cli-parser"
   ],
 
+  "inject": ["core.bin.daemon"],
   "libs": ["gflags"],
 
   "targets": {
