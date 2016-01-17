@@ -48,5 +48,5 @@ void GFlagsCLI::parseLogic(int* argc, char*** argv) {
   // Repository options.
   this->optionalSetString("repo-path", FLAGS_repo_path);
   this->optionalSetString("repo-type", FLAGS_repo_type);
-  this->optionalSetString("repo-ver",  FLAGS_repo_ver);
+  this->optionalSetString("repo-version", FLAGS_repo_ver);
 }

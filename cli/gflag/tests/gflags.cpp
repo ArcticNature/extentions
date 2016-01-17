@@ -1,11 +1,12 @@
 // Copyright 2015 Stefano Pogliani <stefano@spogliani.net>
 #include <gtest/gtest.h>
 
-#include "core/exceptions/options.h"
+#include "core/exceptions/base.h"
+#include "core/model/cli-parser.h"
 #include "ext/cli/gflags.h"
 
 
-using sf::core::exception::VariableNotFound;
+using sf::core::exception::InvalidCommandLine;
 using sf::core::model::CLIParser;
 using sf::ext::cli::GFlagsCLI;
 
@@ -35,12 +36,16 @@ class GFlagsTest : public ::testing::Test {
 // The orider of the tests is important due to GFlags internals.
 TEST_F(GFlagsTest, NoRepo) {
   GFlagsCLI parser;
+  CLIParser::configOptions(&parser);
+  CLIParser::daemonOptions(&parser);
   std::vector<std::string> args = { {"/usr/bin/test"} };
-  ASSERT_THROW(this->parseVector(parser, args), VariableNotFound);
+  ASSERT_THROW(this->parseVector(parser, args), InvalidCommandLine);
 }
 
 TEST_F(GFlagsTest, WithRepo) {
   GFlagsCLI parser;
+  CLIParser::configOptions(&parser);
+  CLIParser::daemonOptions(&parser);
   std::vector<std::string> args = {
     {"/usr/bin/test"},
     {"--repo_path=/test"}
@@ -53,6 +58,8 @@ TEST_F(GFlagsTest, WithRepo) {
 
 TEST_F(GFlagsTest, AllFlags) {
   GFlagsCLI parser;
+  CLIParser::configOptions(&parser);
+  CLIParser::daemonOptions(&parser);
   std::vector<std::string> args = {
     {"/usr/bin/test"}, {"--parser=test"},
     {"--nodaemonise"}, {"--group=g"}, {"--user=u"},
@@ -73,5 +80,5 @@ TEST_F(GFlagsTest, AllFlags) {
 
   ASSERT_EQ("rt", parser.getString("repo-type"));
   ASSERT_EQ("rp", parser.getString("repo-path"));
-  ASSERT_EQ("rv", parser.getString("repo-ver"));
+  ASSERT_EQ("rv", parser.getString("repo-version"));
 }
