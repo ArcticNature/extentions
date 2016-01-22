@@ -12,6 +12,10 @@ DEFINE_string(parser, "gflags", "Specify the command line parser to use.");
 
 // Daemon options.
 DEFINE_bool(daemonise, true, "Run the process in daemon mode");
+DEFINE_bool(
+    drop_privileges, false,
+    "Drop prividelges even when not in daemon mode"
+);
 DEFINE_string(group,   "snow-fox", "Group for the daemon to run as");
 DEFINE_string(user,    "snow-fox", "User for the daemon to run as");
 
@@ -37,6 +41,7 @@ void GFlagsCLI::parseLogic(int* argc, char*** argv) {
 
   // Daemon options.
   this->setBoolean("daemonise", FLAGS_daemonise);
+  this->setBoolean("drop-privileges", FLAGS_drop_privileges);
   this->optionalSetString("group", FLAGS_group);
   this->optionalSetString("user", FLAGS_user);
   this->optionalSetString("work-dir", FLAGS_work_dir);
