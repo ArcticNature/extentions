@@ -1,0 +1,20 @@
+{
+  "name": "ext.event.manager.epoll",
+  "type": "c++",
+
+  "deps": [
+    "core.context.static",
+    "core.interface.lifecycle",
+    "core.interface.posix",
+    "core.model.event",
+    "core.registry.event.managers"
+  ],
+
+  "inject": ["core.bin.daemon"],
+
+  "targets": {
+    "debug":   { "type": "lib" },
+    "release": { "type": "lib" },
+    "test":    { "type": "lib" }
+  }
+}

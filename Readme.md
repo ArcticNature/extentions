@@ -13,3 +13,10 @@ The solution is to abstract away the implementation and let the user choose.
 Built in options are:
 
   * `ext.cli.gflags`: GFlags based command line parser.
+
+
+Events
+------
+Events are divided into different components for granularity.
+
+  * `ext.event.manager.epoll`: Epoll based event manager.

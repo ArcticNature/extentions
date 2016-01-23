@@ -19,7 +19,7 @@ sf::core::model::CLIParser* gflags_factory() {
 }
 
 //! Module initialiser for the GFlags module.
-class ModuleInitHandler : public BaseLifecycleHandler {
+class CliGFlagsInitHandler : public BaseLifecycleHandler {
  public:
   void handle(std::string event, BaseLifecycleArg*) {
     CLIParsers::RegisterFactory("gflags", gflags_factory);
@@ -28,11 +28,11 @@ class ModuleInitHandler : public BaseLifecycleHandler {
 
 
 // Module initialiser.
-class ModuleInit {
+class CliGFlagsModuleInit {
  public:
-  ModuleInit() {
-    LifecycleHandlerRef handler(new ModuleInitHandler());
+  CliGFlagsModuleInit() {
+    LifecycleHandlerRef handler(new CliGFlagsInitHandler());
     Lifecycle::on("process::init", handler);
   }
 };
-ModuleInit module;
+CliGFlagsModuleInit cli_gflags_module;
