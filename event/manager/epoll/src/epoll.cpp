@@ -1,6 +1,8 @@
 // Copyright 2016 Stefano Pogliani <stefano@spogliani.net>
 #include "ext/event/manager/epoll.h"
 
+#include <string>
+
 #include "core/context/static.h"
 
 using sf::core::context::Static;

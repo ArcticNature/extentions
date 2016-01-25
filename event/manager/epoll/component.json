@@ -10,7 +10,9 @@
     "core.registry.event.managers"
   ],
 
-  "inject": ["core.bin.daemon"],
+  "inject": [
+    "core.bin.async-process"
+  ],
 
   "targets": {
     "debug":   { "type": "lib" },

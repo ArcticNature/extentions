@@ -53,7 +53,7 @@ TEST_F(GFlagsTest, WithRepo) {
   
   this->parseVector(parser, args);
   ASSERT_EQ("/test", parser.getString("repo-path"));
-  ASSERT_EQ("/dev/null", parser.getString("stderr"));
+  ASSERT_EQ("", parser.getString("stderr"));
 }
 
 TEST_F(GFlagsTest, AllFlags) {

@@ -3,6 +3,7 @@
 #define EXT_EVENT_MANAGER_EPOLL_H_
 
 #include <map>
+#include <string>
 
 #include "core/model/event.h"
 
