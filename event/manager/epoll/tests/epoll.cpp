@@ -81,7 +81,7 @@ class EpollTest : public ::testing::Test {
   }
 
   ~EpollTest() {
-    Static::reset();
+    Static::destroy();
   }
 };
 
@@ -135,7 +135,7 @@ TEST_F(EpollTest, Add) {
 
 TEST_F(EpollTest, Close) {
   {
-    // Create and destory the manager.
+    // Create and destroy the manager.
     EpollSourceManager manager;
   }
   ASSERT_TRUE(this->posix->closed);
