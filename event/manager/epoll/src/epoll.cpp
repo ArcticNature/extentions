@@ -4,8 +4,10 @@
 #include <string>
 
 #include "core/context/static.h"
+#include "core/exceptions/event.h"
 
 using sf::core::context::Static;
+using sf::core::exception::EventSourceNotFound;
 using sf::core::model::EventRef;
 using sf::core::model::EventSourceRef;
 
@@ -35,7 +37,7 @@ void EpollSourceManager::addSource(EventSourceRef source) {
 
 void EpollSourceManager::removeSource(std::string id) {
   if (this->sources.find(id) == this->sources.end()) {
-    return;
+    throw EventSourceNotFound(id);
   }
 
   EventSourceRef source = this->sources.at(id);
@@ -53,7 +55,7 @@ EventRef EpollSourceManager::wait(int timeout) {
 
   int fd = event.data.fd;
   if (code == 0 || this->index.find(fd) == this->index.end()) {
-    // TODO(stefano): Log event not found.
+    // TODO(stefano): Log event source not found.
     return EventRef();
   }
 
