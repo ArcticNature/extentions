@@ -3,6 +3,7 @@
   "type": "c++",
 
   "deps": [
+    "dependencies.gflags",
     "core.interface.lifecycle",
     "core.registry.cli-parser"
   ],
