@@ -3,11 +3,13 @@
   "type": "c++",
 
   "deps": [
+    "core.context.dynamic",
     "core.context.static",
     "core.interface.lifecycle",
     "core.interface.posix",
     "core.model.event",
-    "core.registry.event.managers"
+    "core.registry.event.managers",
+    "core.utility.string"
   ],
 
   "inject": [

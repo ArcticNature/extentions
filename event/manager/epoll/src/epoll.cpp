@@ -3,14 +3,23 @@
 
 #include <string>
 
+#include "core/context/context.h"
 #include "core/context/static.h"
-#include "core/exceptions/event.h"
 
+#include "core/exceptions/event.h"
+#include "core/model/logger.h"
+
+#include "core/utility/string.h"
+
+using sf::core::context::Context;
 using sf::core::context::Static;
 using sf::core::exception::EventSourceNotFound;
+
 using sf::core::model::EventRef;
 using sf::core::model::EventSourceRef;
+using sf::core::model::LogInfo;
 
+using sf::core::utility::string::toString;
 using sf::ext::event::EpollSourceManager;
 
 
@@ -54,8 +63,14 @@ EventRef EpollSourceManager::wait(int timeout) {
   int code = Static::posix()->epoll_wait(this->epoll_fd, &event, 1, timeout);
 
   int fd = event.data.fd;
-  if (code == 0 || this->index.find(fd) == this->index.end()) {
-    // TODO(stefano): Log event source not found.
+  if (code == 0) {
+    DEBUG(Context::logger(), "Epoll wait timeout");
+    return EventRef();
+  }
+
+  if (this->index.find(fd) == this->index.end()) {
+    LogInfo vars = {{"source", toString(fd)}};
+    ERRORV(Context::logger(), "Unable to find source for FD ${source}.", vars);
     return EventRef();
   }
 
