@@ -65,7 +65,9 @@ TEST_F(GFlagsTest, AllFlags) {
     {"--nodaemonise"}, {"--group=g"}, {"--user=u"},
     {"--stderr=e"}, {"--stdin=i"}, {"--stdout=o"},
     {"--work_dir=wd"}, {"--repo_type=rt"},
-    {"--repo_path=rp"}, {"--repo_ver=rv"}
+    {"--repo_path=rp"}, {"--repo_ver=rv"},
+    {"--manager_socket=ms"}, {"--spawner_socket=ss"},
+    {"--spawner_manager_socket=sms"}
   };
 
   this->parseVector(parser, args);
@@ -81,4 +83,8 @@ TEST_F(GFlagsTest, AllFlags) {
   ASSERT_EQ("rt", parser.getString("repo-type"));
   ASSERT_EQ("rp", parser.getString("repo-path"));
   ASSERT_EQ("rv", parser.getString("repo-version"));
+
+  ASSERT_EQ("ms",  parser.getString("manager-socket"));
+  ASSERT_EQ("ss",  parser.getString("spawner-socket"));
+  ASSERT_EQ("sms", parser.getString("spawner-manager-socket"));
 }

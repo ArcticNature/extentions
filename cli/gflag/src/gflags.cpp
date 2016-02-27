@@ -2,9 +2,15 @@
 #include "ext/cli/gflags.h"
 
 #include <gflags/gflags.h>
+
+#include <map>
 #include <string>
+#include <vector>
+
+#include "core/model/options.h"
 
 
+using sf::core::model::CLIOptionRef;
 using sf::ext::cli::GFlagsCLI;
 
 
@@ -29,6 +35,23 @@ DEFINE_string(repo_type, "git", "The type of configuration repository");
 DEFINE_string(repo_path, "", "The path to the configuration repository");
 DEFINE_string(repo_ver,  "<latest>", "Version of the configuration to use");
 
+// Socket options.
+DEFINE_string(
+    manager_socket,
+    "/var/run/snow-fox-manager.socket",
+    "Path to the socket file to connect daemon and manager."
+);
+DEFINE_string(
+    spawner_socket,
+    "/var/run/snow-fox-spawner.socket",
+    "Path to the socket file to connect daemon and spawner."
+);
+DEFINE_string(
+    spawner_manager_socket,
+    "/var/run/snow-fox-manager-spawner.socket",
+    "Path to the socket file to connect manager and spawner."
+);
+
 
 void GFlagsCLI::optionalSetString(std::string name, std::string value) {
   if (value != "") {
@@ -39,19 +62,39 @@ void GFlagsCLI::optionalSetString(std::string name, std::string value) {
 void GFlagsCLI::parseLogic(int* argc, char*** argv) {
   ::google::ParseCommandLineFlags(argc, argv, true);
 
-  // Daemon options.
-  this->setBoolean("daemonise", FLAGS_daemonise);
-  this->setBoolean("drop-privileges", FLAGS_drop_privileges);
-  this->optionalSetString("group", FLAGS_group);
-  this->optionalSetString("user", FLAGS_user);
-  this->optionalSetString("work-dir", FLAGS_work_dir);
+  // Build values maps.
+  std::map<std::string, bool> bools = {
+    {"daemonise", FLAGS_daemonise},
+    {"drop-privileges", FLAGS_drop_privileges}
+  };
 
-  this->optionalSetString("stderr", FLAGS_stderr);
-  this->optionalSetString("stdin",  FLAGS_stdin);
-  this->optionalSetString("stdout", FLAGS_stdout);
+  std::map<std::string, std::string> optional_strings = {
+    {"group", FLAGS_group},
+    {"user", FLAGS_user},
+    {"work-dir", FLAGS_work_dir},
 
-  // Repository options.
-  this->optionalSetString("repo-path", FLAGS_repo_path);
-  this->optionalSetString("repo-type", FLAGS_repo_type);
-  this->optionalSetString("repo-version", FLAGS_repo_ver);
+    {"stderr", FLAGS_stderr},
+    {"stdin",  FLAGS_stdin},
+    {"stdout", FLAGS_stdout},
+
+    {"repo-path", FLAGS_repo_path},
+    {"repo-type", FLAGS_repo_type},
+    {"repo-version", FLAGS_repo_ver},
+
+    {"manager-socket", FLAGS_manager_socket},
+    {"spawner-socket", FLAGS_spawner_socket},
+    {"spawner-manager-socket", FLAGS_spawner_manager_socket}
+  };
+
+  // Populate added options based on maps.
+  for (std::vector<CLIOptionRef>::iterator it = this->options.begin();
+      it != this->options.end(); it++) {
+    std::string name = (*it)->name();
+    if (bools.find(name) != bools.end()) {
+      this->setBoolean(name, bools[name]);
+    }
+    if (optional_strings.find(name) != optional_strings.end()) {
+      this->optionalSetString(name, optional_strings[name]);
+    }
+  }
 }
