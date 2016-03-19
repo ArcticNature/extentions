@@ -6,6 +6,7 @@
 #include "core/context/context.h"
 #include "core/context/static.h"
 
+#include "core/exceptions/base.h"
 #include "core/exceptions/event.h"
 #include "core/model/logger.h"
 
@@ -13,6 +14,7 @@
 
 using sf::core::context::Context;
 using sf::core::context::Static;
+using sf::core::exception::ErrNoException;
 using sf::core::exception::EventSourceNotFound;
 
 using sf::core::model::EventRef;
@@ -52,7 +54,14 @@ void EpollSourceManager::removeSource(std::string id) {
   EventSourceRef source = this->sources.at(id);
   int fd = source->getFD();
 
-  Static::posix()->epoll_control(this->epoll_fd, EPOLL_CTL_DEL, fd, nullptr);
+  try {
+    Static::posix()->epoll_control(this->epoll_fd, EPOLL_CTL_DEL, fd, nullptr);
+  } catch (ErrNoException& ex) {
+    if (ex.getCode() != EBADF) {
+      throw;
+    }
+    // Ignore bad file descriptors only.
+  }
 
   this->index.erase(fd);
   this->sources.erase(id);
