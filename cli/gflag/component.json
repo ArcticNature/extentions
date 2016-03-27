@@ -14,8 +14,6 @@
     "core.bin.spawner"
   ],
 
-  "libs": ["gflags"],
-
   "targets": {
     "debug":   { "type": "lib" },
     "release": { "type": "lib" },
