@@ -5,6 +5,7 @@
   "deps": [
     "dependencies.gflags",
     "core.interface.lifecycle",
+    "core.lifecycle.process",
     "core.registry.cli-parser"
   ],
 
