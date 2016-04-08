@@ -30,6 +30,9 @@ DEFINE_string(stdin,  "", "Redirect stdin to this file");
 DEFINE_string(stdout, "", "Redirect stdout to this file");
 DEFINE_string(work_dir, ".", "Change the working directory for the process");
 
+// Cluster options.
+DEFINE_string(node_name, "node", "Unique name of the node");
+
 // Configuration repository options.
 DEFINE_string(repo_type, "git", "The type of configuration repository");
 DEFINE_string(repo_path, "", "The path to the configuration repository");
@@ -80,6 +83,8 @@ void GFlagsCLI::parseLogic(int* argc, char*** argv) {
     {"stderr", FLAGS_stderr},
     {"stdin",  FLAGS_stdin},
     {"stdout", FLAGS_stdout},
+
+    {"node-name", FLAGS_node_name},
 
     {"repo-path", FLAGS_repo_path},
     {"repo-type", FLAGS_repo_type},
