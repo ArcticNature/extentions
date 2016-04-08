@@ -52,6 +52,9 @@ DEFINE_string(
     "Path to the socket file to connect manager and spawner."
 );
 
+// Misc options.
+DEFINE_bool(Version, false, "Show version and exit");
+
 
 void GFlagsCLI::optionalSetString(std::string name, std::string value) {
   if (value != "") {
@@ -65,7 +68,8 @@ void GFlagsCLI::parseLogic(int* argc, char*** argv) {
   // Build values maps.
   std::map<std::string, bool> bools = {
     {"daemonise", FLAGS_daemonise},
-    {"drop-privileges", FLAGS_drop_privileges}
+    {"drop-privileges", FLAGS_drop_privileges},
+    {"version", FLAGS_Version}
   };
 
   std::map<std::string, std::string> optional_strings = {

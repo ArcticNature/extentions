@@ -38,6 +38,7 @@ TEST_F(GFlagsTest, NoRepo) {
   GFlagsCLI parser;
   CLIParser::configOptions(&parser);
   CLIParser::daemonOptions(&parser);
+  CLIParser::miscOptions(&parser);
   std::vector<std::string> args = { {"/usr/bin/test"} };
   ASSERT_THROW(this->parseVector(parser, args), InvalidCommandLine);
 }
@@ -46,6 +47,7 @@ TEST_F(GFlagsTest, WithRepo) {
   GFlagsCLI parser;
   CLIParser::configOptions(&parser);
   CLIParser::daemonOptions(&parser);
+  CLIParser::miscOptions(&parser);
   std::vector<std::string> args = {
     {"/usr/bin/test"},
     {"--repo_path=/test"}
@@ -60,6 +62,7 @@ TEST_F(GFlagsTest, AllFlags) {
   GFlagsCLI parser;
   CLIParser::configOptions(&parser);
   CLIParser::daemonOptions(&parser);
+  CLIParser::miscOptions(&parser);
   std::vector<std::string> args = {
     {"/usr/bin/test"}, {"--parser=test"},
     {"--nodaemonise"}, {"--group=g"}, {"--user=u"},
