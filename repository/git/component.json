@@ -1,0 +1,25 @@
+{
+  "name": "ext.repository.git",
+  "type": "c++",
+
+  "deps": [
+    "core.context.dynamic",
+    "core.context.static",
+    "core.interface.lifecycle",
+
+    "core.model.cli-parser",
+    "core.model.logger",
+    "core.model.repository",
+
+    "core.registry.repositories",
+    "dependencies.libgit2"
+  ],
+
+  "inject": ["core.bin.manager"],
+
+  "targets": {
+    "debug":   {"type": "lib"},
+    "release": {"type": "lib"},
+    "test":    {"type": "lib"}
+  }
+}
