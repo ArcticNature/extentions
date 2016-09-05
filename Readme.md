@@ -20,3 +20,10 @@ Events
 Events are divided into different components for granularity.
 
   * `ext.event.manager.epoll`: Epoll based event manager.
+
+
+Repositories
+------------
+List of supported configuration repositories:
+
+  * `ext.repository.git`: Git backed repository.

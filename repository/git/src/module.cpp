@@ -1,5 +1,6 @@
 // Copyright 2015 Stefano Pogliani <stefano@spogliani.net>
 #include <git2.h>
+#include <string>
 
 #include "core/context/context.h"
 #include "core/context/static.h"
