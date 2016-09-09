@@ -34,7 +34,7 @@ EpollSourceManager::~EpollSourceManager() {
 }
 
 
-void EpollSourceManager::addSource(EventSourceRef source) {
+void EpollSourceManager::add(EventSourceRef source) {
   struct epoll_event event;
   int fd = source->getFD();
   event.data.fd = fd;
@@ -46,7 +46,7 @@ void EpollSourceManager::addSource(EventSourceRef source) {
   this->index[fd] = source;
 }
 
-void EpollSourceManager::removeSource(std::string id) {
+void EpollSourceManager::remove(std::string id) {
   if (this->sources.find(id) == this->sources.end()) {
     throw EventSourceNotFound(id);
   }

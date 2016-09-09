@@ -22,8 +22,8 @@ namespace event {
     EpollSourceManager();
     virtual ~EpollSourceManager();
 
-    void addSource(sf::core::model::EventSourceRef source);
-    void removeSource(std::string id);
+    void add(sf::core::model::EventSourceRef source);
+    void remove(std::string id);
     sf::core::model::EventRef wait(int timeout = -1);
   };
 
