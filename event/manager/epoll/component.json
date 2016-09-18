@@ -5,6 +5,7 @@
   "deps": [
     "core.context.dynamic",
     "core.context.static",
+    "core.interface.config.node",
     "core.interface.lifecycle",
     "core.interface.posix",
     "core.model.event",
