@@ -33,7 +33,7 @@ RepositoryRef git_repo_factotry() {
 
   LogInfo info = {{"path", path}};
   INFOV(
-      Context::logger(),
+      Context::Logger(),
       "Using GIT configuration repository from '${path}'", info
   );
 

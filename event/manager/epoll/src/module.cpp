@@ -25,12 +25,12 @@ using sf::core::interface::NodeConfigIntentLuaProxy;
 using sf::core::lifecycle::NodeConfigLifecycleArg;
 using sf::core::lifecycle::NodeConfigLifecycleHandler;
 
-using sf::core::model::EventSourceManagerRef;
-using sf::core::registry::EventSourceManager;
+using sf::core::model::LoopManagerRef;
+using sf::core::registry::LoopManager;
 
 using sf::core::utility::Lua;
 using sf::core::utility::LuaTable;
-using sf::ext::event::EpollSourceManager;
+using sf::ext::event::EpollLoopManager;
 
 
 class EpollConfigIntent : public NodeConfigIntent {
@@ -51,7 +51,7 @@ class EpollConfigIntent : public NodeConfigIntent {
   }
 
   void apply(ContextRef context) {
-    context->initialise(EventSourceManagerRef(new EpollSourceManager()));
+    context->initialise(LoopManagerRef(new EpollLoopManager()));
   }
 
   void verify(ContextRef context) {
@@ -61,8 +61,8 @@ class EpollConfigIntent : public NodeConfigIntent {
 const std::vector<std::string> EpollConfigIntent::DEPENDS = {};
 
 
-EventSourceManagerRef epoll_factory() {
-  return EventSourceManagerRef(new EpollSourceManager());
+LoopManagerRef epoll_factory() {
+  return LoopManagerRef(new EpollLoopManager());
 }
 
 
@@ -75,26 +75,26 @@ int lua_epoll_node_config_intent(lua_State* state) {
 
 
 //! Module initialiser for the EPoll source manager module.
-class EveManEpollProcessInit : public BaseLifecycleHandler {
+class LoopManEpollProcessInit : public BaseLifecycleHandler {
  public:
   void handle(std::string event, BaseLifecycleArg*) {
-    EventSourceManager::RegisterFactory("epoll", epoll_factory);
+    LoopManager::RegisterFactory("epoll", epoll_factory);
   }
 };
 
 
-class EveManEpollConfNodeLuaInit : public NodeConfigLifecycleHandler {
+class LoopManEpollConfNodeLuaInit : public NodeConfigLifecycleHandler {
  public:
   void handle(std::string event, NodeConfigLifecycleArg* arg) {
     Lua* lua = arg->lua();
     LuaTable event_managers = lua->globals()->toTable("event_managers");
     lua->stack()->push(lua_epoll_node_config_intent, 0);
     event_managers.fromStack("epoll");
-    DEBUG(Context::logger(), "Registered NodeConfig::event_managers.epoll");
+    DEBUG(Context::Logger(), "Registered NodeConfig::event_managers.epoll");
   }
 };
 
 
 // Module initialiser.
-LifecycleStaticOn("process::init", EveManEpollProcessInit);
-LifecycleStaticOn("config::node::init-lua", EveManEpollConfNodeLuaInit);
+LifecycleStaticOn("process::init", LoopManEpollProcessInit);
+LifecycleStaticOn("config::node::init-lua", LoopManEpollConfNodeLuaInit);

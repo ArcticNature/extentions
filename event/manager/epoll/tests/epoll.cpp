@@ -18,7 +18,7 @@ using sf::core::model::EventRef;
 using sf::core::model::EventSource;
 using sf::core::model::EventSourceRef;
 
-using sf::ext::event::EpollSourceManager;
+using sf::ext::event::EpollLoopManager;
 
 
 class EpollPosix : public Posix {
@@ -125,10 +125,9 @@ class PipeSource : public EventSource {
 
 
 TEST_F(EpollTest, Add) {
-  EpollSourceManager manager;
+  EpollLoopManager manager;
   EventSourceRef source(new EpollSource());
-
-  manager.addSource(source);
+  manager.add(source);
   ASSERT_EQ(EPOLL_CTL_ADD, this->posix->epoll_op);
   ASSERT_EQ(2, this->posix->epoll_fd);
 }
@@ -136,13 +135,13 @@ TEST_F(EpollTest, Add) {
 TEST_F(EpollTest, Close) {
   {
     // Create and destroy the manager.
-    EpollSourceManager manager;
+    EpollLoopManager manager;
   }
   ASSERT_TRUE(this->posix->closed);
 }
 
 TEST_F(EpollTest, Create) {
-  EpollSourceManager manager;
+  EpollLoopManager manager;
   ASSERT_TRUE(this->posix->created);
 }
 
@@ -152,10 +151,9 @@ TEST_F(EpollTest, Wait) {
   write(pipefd[1], "test", 5);
   this->posix->pass_through = true;
 
-  EpollSourceManager manager;
+  EpollLoopManager manager;
   EventSourceRef source(new PipeSource(pipefd));
-  
-  manager.addSource(source);
+  manager.add(source);
   EventRef event = manager.wait();
   ASSERT_NE(nullptr, event.get());
 
