@@ -9,6 +9,8 @@
 
 #include "ext/event/manager/epoll.h"
 
+#include "core/event/testing.h"
+
 
 using sf::core::context::Static;
 using sf::core::interface::Posix;
@@ -19,6 +21,8 @@ using sf::core::model::EventSource;
 using sf::core::model::EventSourceRef;
 
 using sf::ext::event::EpollLoopManager;
+
+using sf::core::event::TestEvent;
 
 
 class EpollPosix : public Posix {
@@ -61,10 +65,14 @@ class EpollPosix : public Posix {
 
 class EpollSource : public EventSource {
  public:
-  EpollSource() : EventSource("epoll-test-source") {}
-  int getFD() {
+  EpollSource() : EventSource("epoll-test-source") {
+    // Noop.
+  }
+
+  int fd() {
     return 2;
   }
+
   EventRef parse() {
     return EventRef();
   }
@@ -86,11 +94,9 @@ class EpollTest : public ::testing::Test {
 };
 
 
-class TestEvent : public Event {
+class EpollTestEvent : public TestEvent {
  public:
    std::string message;
-   TestEvent(std::string correlation) : Event(correlation, "NULL") {}
-
    void handle() {
      EXPECT_EQ("test", this->message);
    }
@@ -101,6 +107,15 @@ class PipeSource : public EventSource {
  protected:
   int read_fd;
 
+  EventRef parse() {
+    char buffer[5];
+    ::read(this->read_fd, buffer, 5);
+
+    EpollTestEvent* event = new EpollTestEvent();
+    event->message = std::string(buffer);
+    return EventRef(event);
+  }
+
  public:
   PipeSource(int pipe[2]) : EventSource("test-pipe-source") {
     this->read_fd = pipe[0];
@@ -109,17 +124,8 @@ class PipeSource : public EventSource {
     close(this->read_fd);
   }
 
-  int getFD() {
+  int fd() {
     return this->read_fd;
-  }
-
-  EventRef parse() {
-    char buffer[5];
-    ::read(this->read_fd, buffer, 5);
-
-    TestEvent* event = new TestEvent("cor-1");
-    event->message = std::string(buffer);
-    return EventRef(event);
   }
 };
 

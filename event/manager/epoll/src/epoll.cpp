@@ -17,6 +17,7 @@ using sf::core::context::Static;
 using sf::core::exception::ErrNoException;
 using sf::core::exception::EventSourceNotFound;
 
+using sf::core::model::EventDrainRef;
 using sf::core::model::EventRef;
 using sf::core::model::EventSourceRef;
 using sf::core::model::LogInfo;
@@ -34,41 +35,42 @@ EpollLoopManager::~EpollLoopManager() {
 }
 
 
+void EpollLoopManager::add(EventDrainRef drain) {
+  // TODO(stefano): add drain to epoll fd.
+  this->drains.add(drain);
+}
+
 void EpollLoopManager::add(EventSourceRef source) {
   struct epoll_event event;
-  int fd = source->getFD();
+  int fd = source->fd();
   event.data.fd = fd;
   event.events  = EPOLLIN | EPOLLRDHUP | EPOLLPRI | EPOLLERR | EPOLLHUP;
 
   Static::posix()->epoll_control(this->epoll_fd, EPOLL_CTL_ADD, fd, &event);
 
-  this->sources[source->id()] = source;
-  this->sourcesIndex[fd] = source;
+  this->sources.add(source);
 }
 
 void EpollLoopManager::removeDrain(std::string id) {
-  // NOOP
+  // TODO(stefano): remove drain from epoll fd.
+  this->drains.remove(id);
 }
 
 void EpollLoopManager::removeSource(std::string id) {
-  if (this->sources.find(id) == this->sources.end()) {
-    throw EventSourceNotFound(id);
-  }
-
-  EventSourceRef source = this->sources.at(id);
-  int fd = source->getFD();
+  EventSourceRef source = this->sources.get(id);
+  int fd = source->fd();
 
   try {
     Static::posix()->epoll_control(this->epoll_fd, EPOLL_CTL_DEL, fd, nullptr);
   } catch (ErrNoException& ex) {
+    // Ignore bad file descriptors only.
     if (ex.getCode() != EBADF) {
+      this->sources.remove(id);
       throw;
     }
-    // Ignore bad file descriptors only.
   }
 
-  this->sourcesIndex.erase(fd);
-  this->sources.erase(id);
+  this->sources.remove(id);
 }
 
 EventRef EpollLoopManager::wait(int timeout) {
@@ -81,11 +83,12 @@ EventRef EpollLoopManager::wait(int timeout) {
     return EventRef();
   }
 
-  if (this->sourcesIndex.find(fd) == this->sourcesIndex.end()) {
+  try {
+    return this->sources.get(fd)->fetch();
+
+  } catch (EventSourceNotFound&) {
     LogInfo vars = {{"source", toString(fd)}};
     ERRORV(Context::Logger(), "Unable to find source for FD ${source}.", vars);
     return EventRef();
   }
-
-  return this->sourcesIndex[fd]->parse();
 }
