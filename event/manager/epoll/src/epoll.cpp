@@ -15,6 +15,7 @@
 using sf::core::context::Context;
 using sf::core::context::Static;
 using sf::core::exception::ErrNoException;
+using sf::core::exception::EventDrainNotFound;
 using sf::core::exception::EventSourceNotFound;
 
 using sf::core::model::EventDrainRef;
@@ -24,6 +25,42 @@ using sf::core::model::LogInfo;
 
 using sf::core::utility::string::toString;
 using sf::ext::event::EpollLoopManager;
+
+
+EventRef EpollLoopManager::processBoth(int fd) {
+  // Look for and process the drain.
+  try {
+    this->processDrain(fd);
+  } catch (EventDrainNotFound&) {
+    LogInfo vars = {{"fd", toString(fd)}};
+    DEBUGV(
+        Context::Logger(),
+        "Skipping error/hup handling for non-drain ${fd}.", vars
+    );
+  }
+
+  // Look for and process the source.
+  try {
+    return this->sources.get(fd)->fetch();
+  } catch (EventSourceNotFound&) {
+    LogInfo vars = {{"fd", toString(fd)}};
+    DEBUGV(
+        Context::Logger(),
+        "Skipping error/hup handling for non-source ${fd}.", vars
+    );
+    return EventRef();
+  }
+}
+
+EventRef EpollLoopManager::processSource(int fd) {
+  try {
+    return this->sources.get(fd)->fetch();
+  } catch (EventSourceNotFound&) {
+    LogInfo vars = {{"source", toString(fd)}};
+    ERRORV(Context::Logger(), "Unable to find source for FD ${source}.", vars);
+    return EventRef();
+  }
+}
 
 
 EpollLoopManager::EpollLoopManager() {
@@ -36,13 +73,19 @@ EpollLoopManager::~EpollLoopManager() {
 
 
 void EpollLoopManager::add(EventDrainRef drain) {
-  // TODO(stefano): add drain to epoll fd.
+  struct epoll_event event;
+  int fd = this->fdFor(drain);
+  event.data.fd = fd;
+  event.events  = EPOLLOUT | EPOLLHUP | EPOLLERR;
+
+  Static::posix()->epoll_control(this->epoll_fd, EPOLL_CTL_ADD, fd, &event);
+
   this->drains.add(drain);
 }
 
 void EpollLoopManager::add(EventSourceRef source) {
   struct epoll_event event;
-  int fd = source->fd();
+  int fd = this->fdFor(source);
   event.data.fd = fd;
   event.events  = EPOLLIN | EPOLLRDHUP | EPOLLPRI | EPOLLERR | EPOLLHUP;
 
@@ -52,13 +95,25 @@ void EpollLoopManager::add(EventSourceRef source) {
 }
 
 void EpollLoopManager::removeDrain(std::string id) {
-  // TODO(stefano): remove drain from epoll fd.
+  EventDrainRef drain = this->drains.get(id);
+  int fd = this->fdFor(drain);
+
+  try {
+    Static::posix()->epoll_control(this->epoll_fd, EPOLL_CTL_DEL, fd, nullptr);
+  } catch (ErrNoException& ex) {
+    // Ignore bad file descriptors only.
+    if (ex.getCode() != EBADF) {
+      this->drains.remove(id);
+      throw;
+    }
+  }
+
   this->drains.remove(id);
 }
 
 void EpollLoopManager::removeSource(std::string id) {
   EventSourceRef source = this->sources.get(id);
-  int fd = source->fd();
+  int fd = this->fdFor(source);
 
   try {
     Static::posix()->epoll_control(this->epoll_fd, EPOLL_CTL_DEL, fd, nullptr);
@@ -83,12 +138,22 @@ EventRef EpollLoopManager::wait(int timeout) {
     return EventRef();
   }
 
-  try {
-    return this->sources.get(fd)->fetch();
+  // Is it an input event?
+  if (event.events & (EPOLLIN | EPOLLRDHUP | EPOLLPRI)) {
+    return this->processSource(fd);
+  }
 
-  } catch (EventSourceNotFound&) {
-    LogInfo vars = {{"source", toString(fd)}};
-    ERRORV(Context::Logger(), "Unable to find source for FD ${source}.", vars);
+  // Is it an output event?
+  if (event.events & EPOLLOUT) {
+    this->processDrain(fd);
     return EventRef();
   }
+
+  // Is it an error or an hup?
+  if (event.events & (EPOLLHUP | EPOLLERR)) {
+    return this->processBoth(fd);
+  }
+
+  // Unkown event.
+  return EventRef();
 }

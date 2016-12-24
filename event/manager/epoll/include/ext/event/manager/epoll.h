@@ -17,6 +17,12 @@ namespace event {
    protected:
     int epoll_fd;
 
+    //! Process an event on both a drain and a source.
+    sf::core::model::EventRef processBoth(int fd);
+
+    //! Process an event on a source.
+    sf::core::model::EventRef processSource(int fd);
+
    public:
     EpollLoopManager();
     virtual ~EpollLoopManager();
