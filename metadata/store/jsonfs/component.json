@@ -1,0 +1,17 @@
+{
+  "name": "ext.metadata.store.jsonfs",
+  "type": "c++",
+
+  "deps": [
+    "core.context.dynamic",
+    "core.interface.metadata.store"
+  ],
+
+  "inject": ["core.bin.manager"],
+
+  "targets": {
+    "debug":   {"type": "lib"},
+    "release": {"type": "lib"},
+    "test":    {"type": "lib"}
+  }
+}
