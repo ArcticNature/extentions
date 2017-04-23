@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <fstream>
 
+#include "core/testing/promise.h"
 #include "ext/metadata/store/jsonfs.h"
 
 
@@ -12,18 +13,6 @@ using poolqueue::Promise;
 
 using sf::core::interface::MetaDataStoreRef;
 using sf::ext::metadata::JsonFsStore;
-
-
-void ASSERT_PROMISE_NO_THROW(Promise promise) {
-  promise.except([](const std::exception_ptr& exception) {
-    try {
-      std::rethrow_exception(exception);
-    } catch (std::exception& ex) {
-      ADD_FAILURE() << "Promise throws -- " << ex.what();
-    }
-    return nullptr;
-  });
-}
 
 
 class JsonFsStoreTest : public ::testing::Test {

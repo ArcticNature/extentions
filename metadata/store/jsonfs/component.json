@@ -12,6 +12,9 @@
   "targets": {
     "debug":   {"type": "lib"},
     "release": {"type": "lib"},
-    "test":    {"type": "lib"}
+    "test":    {
+      "deps": ["core.testing.promise"],
+      "type": "lib"
+    }
   }
 }
