@@ -4,6 +4,7 @@
 
   "deps": [
     "core.context.dynamic",
+    "core.interface.config.node",
     "core.interface.metadata.store"
   ],
 
@@ -13,7 +14,10 @@
     "debug":   {"type": "lib"},
     "release": {"type": "lib"},
     "test":    {
-      "deps": ["core.testing.promise"],
+      "deps": [
+        "core.testing.hooks",
+        "core.testing.promise"
+      ],
       "type": "lib"
     }
   }
