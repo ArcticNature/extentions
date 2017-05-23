@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "core/cluster/cluster.h"
 #include "core/context/context.h"
 #include "core/context/static.h"
 #include "core/exceptions/configuration.h"
@@ -17,6 +18,9 @@
 
 #include "ext/metadata/store/jsonfs.h"
 
+
+using sf::core::cluster::Cluster;
+using sf::core::cluster::ClusterRaw;
 
 using sf::core::context::Static;
 using sf::core::context::ContextRef;
@@ -44,7 +48,7 @@ class JsonFsStoreIntent : public NodeConfigIntent {
   std::string path_;
 
  public:
-  explicit JsonFsStoreIntent(std::string path) : NodeConfigIntent("jsonfs") {
+  JsonFsStoreIntent(std::string path) : NodeConfigIntent("jsonfs") {
     this->path_ = path;
   }
 
@@ -88,6 +92,24 @@ class JsonFsStoreIntent : public NodeConfigIntent {
 };
 
 
+// TODO(stefano): Remove this as soon as the config refactoring is done.
+class JsonFsClusterStoreIntent : public JsonFsStoreIntent {
+ public:
+  JsonFsClusterStoreIntent(std::string path) : JsonFsStoreIntent(path) {
+    // NOOP
+  }
+  virtual std::string provides() const {
+    return "cluster.metadata";
+  }
+
+  virtual void apply(ContextRef context) {
+    MetaDataStoreRef store = std::make_shared<JsonFsStore>(this->path_);
+    Cluster cluster = std::make_shared<ClusterRaw>(store);
+    context->initialise(cluster);
+  }
+};
+
+
 //! Returns a NodeConfigIntent to build a JsonFsStore.
 int lua_jsonfs_intent(lua_State* state) {
   NodeConfigIntentLuaProxy type;
@@ -104,12 +126,32 @@ int lua_jsonfs_intent(lua_State* state) {
   return 1;
 }
 
+//! Returns a NodeConfigIntent to build a JsonFsStore for cluster metadata.
+// TODO(stefano): Remove this as soon as the config refactoring is done.
+int lua_jsonfs_cluster_intent(lua_State* state) {
+  NodeConfigIntentLuaProxy type;
+  Lua* lua = Lua::fetchFrom(state);
+
+  // Process argument.
+  LuaArguments args(lua);
+  LuaTable options = args.table(1);
+  std::string path = options.toString("store");
+
+  // Create and return the intent.
+  auto intent = std::make_shared<JsonFsClusterStoreIntent>(path);
+  type.wrap(*lua, intent);
+  return 1;
+}
+
 
 void JsonFsStoreConfig::AttachLuaInit() {
   NodeConfig::LuaInit.attach([](Lua lua) {
     auto globals = lua.globals();
     auto metastores = globals->toTable("metastores");
     metastores.set("jsonfs", lua_jsonfs_intent);
+
+    // TODO(stefano): Remove this as soon as the config refactoring is done.
+    metastores.set("jsonfs_cluster", lua_jsonfs_cluster_intent);
   });
 }
 
