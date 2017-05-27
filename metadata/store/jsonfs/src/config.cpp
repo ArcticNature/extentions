@@ -48,7 +48,7 @@ class JsonFsStoreIntent : public NodeConfigIntent {
   std::string path_;
 
  public:
-  JsonFsStoreIntent(std::string path) : NodeConfigIntent("jsonfs") {
+  explicit JsonFsStoreIntent(std::string path) : NodeConfigIntent("jsonfs") {
     this->path_ = path;
   }
 
@@ -95,7 +95,8 @@ class JsonFsStoreIntent : public NodeConfigIntent {
 // TODO(stefano): Remove this as soon as the config refactoring is done.
 class JsonFsClusterStoreIntent : public JsonFsStoreIntent {
  public:
-  JsonFsClusterStoreIntent(std::string path) : JsonFsStoreIntent(path) {
+  explicit JsonFsClusterStoreIntent(std::string path)
+    : JsonFsStoreIntent(path) {
     // NOOP
   }
   virtual std::string provides() const {
@@ -105,7 +106,7 @@ class JsonFsClusterStoreIntent : public JsonFsStoreIntent {
   virtual void apply(ContextRef context) {
     MetaDataStoreRef store = std::make_shared<JsonFsStore>(this->path_);
     Cluster cluster = std::make_shared<ClusterRaw>(store);
-    context->initialise(cluster);
+    Cluster::Instance(cluster);
   }
 };
 
