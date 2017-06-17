@@ -54,7 +54,7 @@ TEST_F(JsonFsStoreTest, EraseExistingKeyUpdatesFile) {
 
   // Erease an existing key.
   auto erase = this->store->erase("key");
-  ASSERT_PROMISE_NO_THROW(erase);
+  EXPECT_PROMISE_NO_THROW(erase);
   ASSERT_TRUE(erase.settled());
 
   // Read the json back to check the content.
@@ -75,14 +75,14 @@ TEST_F(JsonFsStoreTest, GetStoredFile) {
     EXPECT_EQ("value", value);
     return nullptr;
   });
-  ASSERT_PROMISE_NO_THROW(value);
+  EXPECT_PROMISE_NO_THROW(value);
   ASSERT_TRUE(value.settled());
 }
 
 TEST_F(JsonFsStoreTest, StoreJson) {
   // Store something new.
   auto save = this->store->set("key", "\"value\""_json);
-  ASSERT_PROMISE_NO_THROW(save);
+  EXPECT_PROMISE_NO_THROW(save);
   ASSERT_TRUE(save.settled());
 
   // Read the json back to check the content.
@@ -93,7 +93,7 @@ TEST_F(JsonFsStoreTest, StoreJson) {
 
 TEST_F(JsonFsStoreTest, StoreThenGet) {
   auto save = this->store->set("test", "42"_json);
-  ASSERT_PROMISE_NO_THROW(save);
+  EXPECT_PROMISE_NO_THROW(save);
   ASSERT_TRUE(save.settled());
 
   auto load = this->store->get("test").then([](json v) {
@@ -101,14 +101,14 @@ TEST_F(JsonFsStoreTest, StoreThenGet) {
     EXPECT_EQ(42, value);
     return nullptr;
   });
-  ASSERT_PROMISE_NO_THROW(load);
+  EXPECT_PROMISE_NO_THROW(load);
   ASSERT_TRUE(load.settled());
 }
 
 TEST_F(JsonFsStoreTest, StoreWithTTL) {
   std::chrono::duration<int> ttl(0);
   auto save = this->store->set("test", "42"_json, ttl);
-  ASSERT_PROMISE_NO_THROW(save);
+  EXPECT_PROMISE_NO_THROW(save);
   ASSERT_TRUE(save.settled());
 
   auto load = this->store->get("test").then([](json v) {
@@ -116,6 +116,6 @@ TEST_F(JsonFsStoreTest, StoreWithTTL) {
     EXPECT_EQ(42, value);
     return nullptr;
   });
-  ASSERT_PROMISE_NO_THROW(load);
+  EXPECT_PROMISE_NO_THROW(load);
   ASSERT_TRUE(load.settled());
 }
