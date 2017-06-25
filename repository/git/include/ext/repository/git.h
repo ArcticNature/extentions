@@ -62,6 +62,7 @@ namespace repository {
     ~GitRepoVersion();
 
     virtual bool exists(const std::string path);
+    virtual std::string readFile(const std::string path);
     virtual sf::core::model::IStreamRef streamFile(const std::string path);
   };
 

@@ -142,6 +142,32 @@ bool GitRepoVersion::exists(const std::string path) {
   return true;
 }
 
+std::string GitRepoVersion::readFile(const std::string path) {
+  // Get tree entry from path.
+  git_tree_entry* entry = nullptr;
+  int error = git_tree_entry_bypath(&entry, this->tree, path.c_str());
+  GitException::checkGitError(error);
+
+  // Check type is blob.
+  if (git_tree_entry_type(entry) != GIT_OBJ_BLOB) {
+    git_tree_entry_free(entry);
+    throw GitTypeError(GIT_OBJ_BLOB, git_tree_entry_type(entry));
+  }
+
+  // Convert to blob.
+  git_blob* blob = nullptr;
+  error = git_blob_lookup(&blob, this->repo->repo, git_tree_entry_id(entry));
+  git_tree_entry_free(entry);
+  GitException::checkGitError(error);
+
+  // Copy the blob as a string.
+  const char* raw_string = reinterpret_cast<const char*>(
+      git_blob_rawcontent(blob)
+  );
+  auto size = git_blob_rawsize(blob);
+  return std::string(raw_string, size);
+}
+
 IStreamRef GitRepoVersion::streamFile(const std::string path) {
   // Get tree entry from path.
   git_tree_entry* entry = nullptr;
